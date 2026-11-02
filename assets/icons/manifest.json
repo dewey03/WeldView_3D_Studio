@@ -1,0 +1,23 @@
+{
+  "name": "WeldView 3D Studio V2.2",
+  "short_name": "WeldView 3D",
+  "description": "工业级三维焊缝标注与交互式工艺效果图系统 V2.2",
+  "start_url": "/studio",
+  "display": "standalone",
+  "background_color": "#080E1A",
+  "theme_color": "#101C2F",
+  "icons": [
+    {
+      "src": "assets/icons/png/C_192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icons/png/C_512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

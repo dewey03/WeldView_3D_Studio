@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="beadCs" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#F97316"/>
+      <stop offset="50%" stop-color="#FBBF24"/>
+      <stop offset="100%" stop-color="#22D3EE"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="32" height="32" rx="7" ry="7" fill="#080E1A"/>
+  <path d="M 6,9 L 11,23 L 16,13 L 21,23 L 26,9" fill="none" stroke="url(#beadCs)" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
