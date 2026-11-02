@@ -1,0 +1,50 @@
+# ---- 大体积二进制产物（通过 GitHub Releases 分发，不入库）----
+*.exe
+*.msi
+*.dmg
+*.zip
+*.7z
+
+# ---- 构建与打包中间产物 ----
+dist/
+build/
+out/
+release/
+*.spec
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# ---- Node ----
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ---- 三维模型与中间数据 ----
+*.step
+*.stp
+*.igs
+*.iges
+*.stl
+*.obj
+*.gltf
+*.glb
+
+# ---- 编辑器与系统 ----
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- 本地临时文件 ----
+~$*
+*.tmp
+*.bak
