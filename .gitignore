@@ -48,3 +48,13 @@ desktop.ini
 ~$*
 *.tmp
 *.bak
+
+# ---- .NET 构建产物 ----
+bin/
+obj/
+*.user
+
+# ---- 例外：保留样例模型（供导入功能测试）----
+!samples/*.STEP
+!samples/*.step
+!samples/*.stp

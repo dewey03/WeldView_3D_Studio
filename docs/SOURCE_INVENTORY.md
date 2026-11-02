@@ -1,39 +1,47 @@
-# 源码构成与缺失说明
+# 源码构成与完整度说明
 
-> 本文档说明本仓库中源码的实际来源、完整度，以及尚未纳入版本管理的内容。
+> 本文档说明本仓库中每类源码的**真实来源**与**完整度**，避免误判为完整工程。
 > 最后更新：2026-11-02
 
 ---
 
-## 一、源码来源
+## 一、三类来源，务必区分
 
-原始开发工程目录在交付后未留存。本仓库中的源码**恢复自已安装程序目录**：
-
-```
-E:\WeldView 3D Studio\        （V3.3 – V3.7 运行时资源，安装后的实际运行目录）
-```
-
-恢复方式为直接复制运行时文件，**未做任何反编译或代码修改**。因此：
-
-- 收录的是**运行时实际执行的代码**，逻辑与发行版一致；
-- 但**不是**开发者的原始工程结构（无 Git 历史、无源目录组织、无注释级文档）。
+| 类别 | 目录 | 来源 | 可信度 |
+| :--- | :--- | :--- | :--- |
+| **① 原始运行时代码** | `assets/app/`、`assets/vendor/`、`assets/icons/`、`tools/`、`WeldView_3D_Studio_V3.3.html`、`index.html` | 直接复制自已安装程序目录，**未做任何修改** | 与发行版逐字节一致 |
+| **② 重建代码** | `desktop/`、`installer/`、`scripts/` | 依据二进制与目录结构静态分析**重新编写** | 功能等价，**非原始源码**，详见 [RECONSTRUCTION.md](RECONSTRUCTION.md) |
+| **③ 文档** | `README.md`、`docs/` | 本次整理编写 | — |
 
 ---
 
-## 二、已收录内容
+## 二、目录布局（与安装目录一致）
 
-| 路径 | 类型 | 大小 | 说明 |
-| :--- | :--- | ---: | :--- |
-| `app/wv33.js` | 应用源码 | 232.2 KB | **核心业务逻辑**，见下方函数对照 |
-| `tools/WeldView_3D_SolidWorks_Bridge_Service.py` | Python 源码 | 31.7 KB | SolidWorks 桥接服务：装配体遍历、特征边提取、真实边长计算、坡口几何测量、STL 解析 |
-| `tools/build_icons.js` | 构建脚本 | 2.2 KB | 图标构建脚本（Node + sharp，生成多尺寸 PNG 与 7 层 ICO） |
-| `app/vendor/three/` | 第三方 | 678.9 KB | three.js 运行时（MIT），含 `RoomEnvironment.js` |
-| `app/vendor/occt/` | 第三方 | 7.5 MB | OpenCASCADE WASM 导入器（LGPL-2.1），负责 STEP / IGES 解析 |
-| `assets/icons/` | 资源 | 274 KB | 图标 SVG 源文件、多尺寸 PNG、ICO、manifest |
-| `legacy/WeldView_3D_Studio_V3.3.html` | 历史版本 | 523.4 KB | V3.3 单文件版本，用于版本对照 |
-| `index.html` | 发行版 | 1.6 MB | V3.7 单文件发行版（自包含，可直接运行） |
+```
+<repo root>/
+├── WeldView_3D_Studio_V3.3.html     # ① 桌面端宿主页面（exe 加载的入口页）
+├── index.html                       # ① V3.7 单文件发行版（自包含，可直接浏览器打开）
+├── assets/
+│   ├── app/wv33.js                  # ① 核心业务逻辑（232 KB）
+│   ├── vendor/three/                # ① three.js（MIT）
+│   ├── vendor/occt/                 # ① OpenCASCADE WASM 导入器（LGPL-2.1）
+│   └── icons/                       # ① 图标 SVG 源文件与多尺寸资源
+├── samples/                         # ① 样例 STEP 模型
+├── tools/
+│   ├── WeldView_3D_SolidWorks_Bridge_Service.py   # ① SolidWorks 桥接服务（31.7 KB）
+│   └── build_icons.js               # ① 图标构建脚本（Node + sharp）
+├── desktop/                         # ② 桌面主程序（.NET 8 + WPF + WebView2，重建）
+├── installer/WeldView_Setup.iss     # ② 安装包配置（Inno Setup 6，重建）
+├── scripts/build.ps1|build.bat      # ② 构建脚本（重建）
+└── docs/                            # ③ 文档
+```
 
-### `app/wv33.js` 关键函数对照
+> ⚠️ `assets/` 与宿主页面的相对位置**不可更改**。宿主页用 `assets/app/wv33.js`
+> 与 importmap `./assets/vendor/three/...` 引用资源，移动目录会导致页面白屏。
+
+---
+
+## 三、`assets/app/wv33.js` 关键函数对照
 
 | 功能域 | 函数 |
 | :--- | :--- |
@@ -48,55 +56,53 @@ E:\WeldView 3D Studio\        （V3.3 – V3.7 运行时资源，安装后的实
 
 ---
 
-## 三、缺失内容
+## 四、完整度结论
 
-以下内容在本机**不存在**，无法纳入仓库：
-
-| 缺失项 | 影响 | 说明 |
+| 模块 | 状态 | 说明 |
 | :--- | :--- | :--- |
-| **桌面主程序外壳源码** | 无法从源码重新编译出 `.exe` | 发行版 exe 为编译产物（含 Rust / WebView2 特征），无可读源码留存；反向提取无法还原为可维护代码 |
-| **安装包配置** | 无法自动生成 Setup 安装程序 | 未发现 Inno Setup `.iss` 或 NSIS `.nsi` 脚本 |
-| **打包 / 构建脚本** | 无法一键产出安装包 | 未发现 `.spec`、`package.json`、`build.bat`、CI 配置 |
-| **独立标注页面源码** | 标注交互逻辑分散 | 相关逻辑内嵌于 `app/wv33.js`，无独立页面文件 |
-| **开发期 Git 历史** | 无逐版本演进记录 | 原始工程未留存 |
-
-> 上述缺失项如后续找回原始工程，可直接覆盖 `app/` 与 `tools/` 并补充 `build/`、`installer/` 目录。
+| 三维渲染与焊缝识别逻辑 | ✅ 完整 | `wv33.js` 为发行版实际执行代码 |
+| 模型导入（STEP/IGES） | ✅ 完整 | OpenCASCADE WASM + `buildModelFromOcct` |
+| SolidWorks 数据抽取 | ✅ 完整 | 桥接服务 Python 源码 |
+| 文件导出 | ✅ 完整 | `exportDeliverableV33` 等函数 |
+| 桌面主程序 | ⚠️ 重建 | 可编译，行为等价，非原始代码 |
+| 安装包配置 | ⚠️ 重建 | Inno Setup 脚本，非原始配置 |
+| 构建脚本 | ⚠️ 重建 | 按重建工程编写 |
+| 原始 Git 历史 | ❌ 缺失 | 无法恢复 |
 
 ---
 
-## 四、运行方式
+## 五、运行方式
 
-### 单文件发行版（推荐，零依赖）
+### 单文件发行版（零依赖）
 
-直接用浏览器打开 `index.html`。完全自包含，无需 Node 或任何 CDN。
+浏览器直接打开 `index.html`。
 
-### 模块化源码（需本地静态服务）
-
-`app/wv33.js` 依赖 ES Module 与 WASM，**必须通过 HTTP 服务访问**，`file://` 协议下 WASM 会被浏览器拦截：
+### 模块化版本（需 http 服务）
 
 ```bash
-# 在仓库根目录执行
 python -m http.server 8080
-# 浏览器访问 http://localhost:8080/app/
+# 访问 http://localhost:8080/WeldView_3D_Studio_V3.3.html
 ```
 
-目录约定：`app/vendor/` 下的路径为运行时相对路径，移动文件需同步修改 `wv33.js` 中的引用。
+`file://` 下 WASM 与 ES Module 会被浏览器拦截，必须走 http。
 
-### 图标构建
+### 桌面端（重建）
 
-```bash
-npm install sharp
-node tools/build_icons.js
+```bat
+scripts\build.bat
 ```
+
+依赖：.NET SDK 8+、WebView2 Runtime、（打包时）Inno Setup 6。
 
 ---
 
-## 五、第三方组件许可
+## 六、第三方组件许可
 
 | 组件 | 许可 | 文件 |
 | :--- | :--- | :--- |
-| three.js | MIT | `app/vendor/three/three.module.min.js` |
-| occt-import-js | LGPL-2.1 | `app/vendor/occt/license.occt-import-js.txt` |
-| OpenCASCADE | LGPL-2.1 | `app/vendor/occt/license.occt.txt` |
+| three.js | MIT | `assets/vendor/three/three.module.min.js` |
+| occt-import-js | LGPL-2.1 | `assets/vendor/occt/license.occt-import-js.txt` |
+| OpenCASCADE | LGPL-2.1 | `assets/vendor/occt/license.occt.txt` |
+| Microsoft.Web.WebView2 | 微软许可 | NuGet 包引用（不随仓库分发） |
 
 LGPL 组件以独立 WASM 形式分发，未静态链接进自有代码，符合 LGPL 分发要求。

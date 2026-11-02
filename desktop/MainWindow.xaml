@@ -1,0 +1,31 @@
+<Window x:Class="WeldView.Desktop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        Title="WeldView 3D Studio"
+        Height="900" Width="1440"
+        MinHeight="600" MinWidth="960"
+        WindowStartupLocation="CenterScreen"
+        Icon="app.ico"
+        Background="#F4F9FE">
+
+    <Grid>
+        <wv2:WebView2 x:Name="View" Visibility="Collapsed" />
+
+        <Border x:Name="Splash" Background="#F4F9FE">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="620">
+                <TextBlock Text="WeldView 3D Studio"
+                           FontSize="30" FontWeight="Bold"
+                           Foreground="#1D2B3F" HorizontalAlignment="Center" />
+                <TextBlock Text="三维焊缝识别与焊材定额核算工作台"
+                           FontSize="14" Foreground="#5A7392"
+                           Margin="0,10,0,0" HorizontalAlignment="Center" />
+                <TextBlock x:Name="SplashStatus"
+                           Text="正在初始化三维渲染内核…"
+                           FontSize="13" Foreground="#7C93AE"
+                           Margin="0,26,0,0" HorizontalAlignment="Center"
+                           TextWrapping="Wrap" TextAlignment="Center" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

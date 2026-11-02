@@ -37,11 +37,17 @@ WeldView 3D Studio 面向钢箱梁、顶梁等大型焊接结构件，从三维�
 
 ### 方式三：从模块化源码运行
 
-`app/wv33.js` 依赖 ES Module 与 WASM，**必须通过 HTTP 服务访问**（`file://` 下 WASM 会被浏览器拦截）：
+前端使用 ES Module + WASM，**必须通过 HTTP 服务访问**（`file://` 下会被浏览器拦截）：
 
 ```bash
 python -m http.server 8080
-# 浏览器访问 http://localhost:8080/app/
+# 浏览器访问 http://localhost:8080/WeldView_3D_Studio_V3.3.html
+```
+
+桌面端需自行编译（原始工程未留存，仓库内为重建实现）：
+
+```bat
+scripts\build.bat
 ```
 
 ---
@@ -51,25 +57,29 @@ python -m http.server 8080
 ```
 WeldView_3D_Studio/
 ├── index.html                          # V3.7 单文件发行版（自包含，可直接运行）
-├── app/
-│   ├── wv33.js                         # 核心业务逻辑：模型导入 / 特征边提取 / 自动识别 / 导出
-│   └── vendor/
-│       ├── three/                      # three.js 运行时（MIT）
-│       └── occt/                       # OpenCASCADE WASM 导入器（LGPL-2.1，STEP/IGES 解析）
+├── WeldView_3D_Studio_V3.3.html        # 桌面端宿主页面（exe 加载的入口页）
+├── assets/
+│   ├── app/wv33.js                     # 核心业务逻辑：模型导入 / 特征边提取 / 自动识别 / 导出
+│   ├── vendor/three/                   # three.js 运行时（MIT）
+│   ├── vendor/occt/                    # OpenCASCADE WASM 导入器（LGPL-2.1，STEP/IGES 解析）
+│   └── icons/                          # 图标 SVG 源文件、多尺寸 PNG、ICO、manifest
+├── samples/                            # 样例 STEP 模型
+├── desktop/                            # 桌面主程序（.NET 8 + WPF + WebView2，重建）
+├── installer/WeldView_Setup.iss        # 安装包配置（Inno Setup 6，重建）
+├── scripts/build.ps1 | build.bat       # 一键构建（重建）
 ├── tools/
 │   ├── WeldView_3D_SolidWorks_Bridge_Service.py   # SolidWorks 桥接服务
 │   └── build_icons.js                  # 图标构建脚本（Node + sharp）
-├── assets/icons/                       # 图标 SVG 源文件、多尺寸 PNG、ICO、manifest
-├── legacy/
-│   └── WeldView_3D_Studio_V3.3.html    # V3.3 历史版本
 ├── docs/
-│   ├── RELEASE_NOTES_V3.7.md           # V3.7 升级与打包说明（含识别对比数据）
-│   └── SOURCE_INVENTORY.md             # 源码构成与缺失说明（务必先读）
+│   ├── RELEASE_NOTES_V3.7.md           # V3.7 升级与打包说明
+│   ├── SOURCE_INVENTORY.md             # 源码构成与完整度说明
+│   └── RECONSTRUCTION.md               # 重建依据与已知差异
 ├── README.md
 └── .gitignore
 ```
 
-> `index.html` 原文件名为 `21000顶梁一焊新_交互式3D焊缝效果图_V3.7.html`，为便于静态托管重命名，内容未作修改。
+> ⚠️ `assets/` 与宿主页面的相对位置不可更改，宿主页用 `assets/app/wv33.js` 与 importmap
+> `./assets/vendor/three/...` 引用资源，移动目录会导致页面白屏。
 >
 > 桌面端安装包约 62 MB，未纳入 Git 版本管理，通过 Releases 分发。
 
@@ -77,12 +87,19 @@ WeldView_3D_Studio/
 
 ## 4. 源码说明（重要）
 
-本仓库源码**恢复自交付时的已安装程序目录**，非开发者原始工程结构。
+原始开发工程未留存。仓库内源码分三类，**请勿混同**：
 
-- ✅ **已包含**：核心业务逻辑 `app/wv33.js`（232 KB）、SolidWorks 桥接服务、图标构建脚本、全部第三方依赖与许可证。
-- ❌ **未包含**：桌面主程序外壳源码、安装包配置（`.iss` / `.nsi`）、打包构建脚本（`.spec` / `package.json`）。
+| 类别 | 位置 | 说明 |
+| :--- | :--- | :--- |
+| **原始运行时代码** | `assets/`、`tools/`、`WeldView_3D_Studio_V3.3.html`、`index.html` | 直接复制自安装目录，与发行版逐字节一致 |
+| **重建代码** | `desktop/`、`installer/`、`scripts/` | 依据二进制静态分析重新编写，**功能等价但非原始源码** |
+| **文档** | `README.md`、`docs/` | 本次整理 |
 
-完整清单、函数对照表与缺失项影响分析，见 **[docs/SOURCE_INVENTORY.md](docs/SOURCE_INVENTORY.md)**。
+- ✅ 完整：焊缝识别与渲染逻辑、模型导入、SolidWorks 数据抽取、文件导出。
+- ⚠️ 重建：桌面主程序（.NET 8 + WPF + WebView2）、安装包配置、构建脚本。已通过编译验证（0 错误 0 警告）。
+- ❌ 缺失：原始 Git 历史。
+
+详见 **[docs/SOURCE_INVENTORY.md](docs/SOURCE_INVENTORY.md)** 与 **[docs/RECONSTRUCTION.md](docs/RECONSTRUCTION.md)**。
 
 ---
 

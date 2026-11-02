@@ -1,0 +1,168 @@
+ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION((' WeldView 3D Industrial STEP Sample - 14 Shield Beam Right Guard Plate '),'2;1');
+FILE_NAME('14 掩护梁右侧护板.STEP','2026-10-18T12:00:00',('Engineer'),('WeldView 3D Studio'),'WeldView STEP Kernel','SolidWorks 2024','');
+FILE_SCHEMA(('AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }'));
+ENDSEC;
+DATA;
+#1 = PRODUCT('14 掩护梁右侧护板','14 掩护梁右侧护板','',(#2));
+#2 = PRODUCT_CONTEXT('',#3,'mechanical');
+#3 = APPLICATION_CONTEXT('automotive_design');
+#10 = DIRECTION('Z',(0.0,0.0,1.0));
+#11 = DIRECTION('X',(1.0,0.0,0.0));
+#12 = DIRECTION('Y',(0.0,1.0,0.0));
+#13 = DIRECTION('NZ',(0.0,0.0,-1.0));
+#14 = DIRECTION('NX',(-1.0,0.0,0.0));
+#15 = DIRECTION('NY',(0.0,-1.0,0.0));
+#16 = DIRECTION('BEV1',(0.70710678,0.0,0.70710678));
+#17 = DIRECTION('BEV2',(0.0,0.70710678,0.70710678));
+
+/* Base Guard Plate Vertices (280 x 160 x 20 mm with 45-deg beveled top/right edge) */
+#100 = CARTESIAN_POINT('',(-140.0,-80.0,-10.0));
+#101 = CARTESIAN_POINT('',( 140.0,-80.0,-10.0));
+#102 = CARTESIAN_POINT('',( 140.0, 50.0,-10.0));
+#103 = CARTESIAN_POINT('',(  95.0, 80.0,-10.0));
+#104 = CARTESIAN_POINT('',(-140.0, 80.0,-10.0));
+
+#105 = CARTESIAN_POINT('',(-140.0,-80.0, 10.0));
+#106 = CARTESIAN_POINT('',( 128.0,-80.0, 10.0));
+#107 = CARTESIAN_POINT('',( 128.0, 46.0, 10.0));
+#108 = CARTESIAN_POINT('',(  90.0, 72.0, 10.0));
+#109 = CARTESIAN_POINT('',(-140.0, 72.0, 10.0));
+
+/* Stiffener Lug on Guard Plate (120 x 16 x 42 mm) */
+#110 = CARTESIAN_POINT('',(-80.0,-8.0, 10.0));
+#111 = CARTESIAN_POINT('',( 40.0,-8.0, 10.0));
+#112 = CARTESIAN_POINT('',( 40.0, 8.0, 10.0));
+#113 = CARTESIAN_POINT('',(-80.0, 8.0, 10.0));
+#114 = CARTESIAN_POINT('',(-80.0,-8.0, 52.0));
+#115 = CARTESIAN_POINT('',( 25.0,-8.0, 52.0));
+#116 = CARTESIAN_POINT('',( 25.0, 8.0, 52.0));
+#117 = CARTESIAN_POINT('',(-80.0, 8.0, 52.0));
+
+#200 = VERTEX_POINT('',#100);
+#201 = VERTEX_POINT('',#101);
+#202 = VERTEX_POINT('',#102);
+#203 = VERTEX_POINT('',#103);
+#204 = VERTEX_POINT('',#104);
+#205 = VERTEX_POINT('',#105);
+#206 = VERTEX_POINT('',#106);
+#207 = VERTEX_POINT('',#107);
+#208 = VERTEX_POINT('',#108);
+#209 = VERTEX_POINT('',#109);
+
+#210 = VERTEX_POINT('',#110);
+#211 = VERTEX_POINT('',#111);
+#212 = VERTEX_POINT('',#112);
+#213 = VERTEX_POINT('',#113);
+#214 = VERTEX_POINT('',#114);
+#215 = VERTEX_POINT('',#115);
+#216 = VERTEX_POINT('',#116);
+#217 = VERTEX_POINT('',#117);
+
+/* Edge Curves - Main Plate */
+#300 = EDGE_CURVE('',#200,#201,#900,.T.);
+#301 = EDGE_CURVE('',#201,#202,#900,.T.);
+#302 = EDGE_CURVE('',#202,#203,#900,.T.);
+#303 = EDGE_CURVE('',#203,#204,#900,.T.);
+#304 = EDGE_CURVE('',#204,#200,#900,.T.);
+
+#305 = EDGE_CURVE('',#205,#206,#900,.T.);
+#306 = EDGE_CURVE('',#206,#207,#900,.T.);
+#307 = EDGE_CURVE('',#207,#208,#900,.T.);
+#308 = EDGE_CURVE('',#208,#209,#900,.T.);
+#309 = EDGE_CURVE('',#209,#205,#900,.T.);
+
+#310 = EDGE_CURVE('',#200,#205,#900,.T.);
+#311 = EDGE_CURVE('',#201,#206,#900,.T.);
+#312 = EDGE_CURVE('',#202,#207,#900,.T.);
+#313 = EDGE_CURVE('',#203,#208,#900,.T.);
+#314 = EDGE_CURVE('',#204,#209,#900,.T.);
+
+/* Edge Curves - Stiffener Lug */
+#320 = EDGE_CURVE('',#210,#211,#900,.T.);
+#321 = EDGE_CURVE('',#211,#212,#900,.T.);
+#322 = EDGE_CURVE('',#212,#213,#900,.T.);
+#323 = EDGE_CURVE('',#213,#210,#900,.T.);
+#324 = EDGE_CURVE('',#214,#215,#900,.T.);
+#325 = EDGE_CURVE('',#215,#216,#900,.T.);
+#326 = EDGE_CURVE('',#216,#217,#900,.T.);
+#327 = EDGE_CURVE('',#217,#214,#900,.T.);
+#328 = EDGE_CURVE('',#210,#214,#900,.T.);
+#329 = EDGE_CURVE('',#211,#215,#900,.T.);
+#330 = EDGE_CURVE('',#212,#216,#900,.T.);
+#331 = EDGE_CURVE('',#213,#217,#900,.T.);
+
+/* Poly Loops for Main Guard Plate Faces */
+#400 = POLY_LOOP('',(#100,#104,#103,#102,#101));
+#401 = POLY_LOOP('',(#105,#106,#107,#108,#109));
+#402 = POLY_LOOP('',(#100,#101,#106,#105));
+#403 = POLY_LOOP('',(#101,#102,#107,#106));
+#404 = POLY_LOOP('',(#102,#103,#108,#107));
+#405 = POLY_LOOP('',(#103,#104,#109,#108));
+#406 = POLY_LOOP('',(#104,#100,#105,#109));
+
+/* Poly Loops for Stiffener Lug Faces */
+#410 = POLY_LOOP('',(#114,#115,#116,#117));
+#411 = POLY_LOOP('',(#110,#111,#115,#114));
+#412 = POLY_LOOP('',(#111,#112,#116,#115));
+#413 = POLY_LOOP('',(#112,#113,#117,#116));
+#414 = POLY_LOOP('',(#113,#110,#114,#117));
+
+#500 = FACE_OUTER_BOUND('',#400,.T.);
+#501 = FACE_OUTER_BOUND('',#401,.T.);
+#502 = FACE_OUTER_BOUND('',#402,.T.);
+#503 = FACE_OUTER_BOUND('',#403,.T.);
+#504 = FACE_OUTER_BOUND('',#404,.T.);
+#505 = FACE_OUTER_BOUND('',#405,.T.);
+#506 = FACE_OUTER_BOUND('',#406,.T.);
+
+#510 = FACE_OUTER_BOUND('',#410,.T.);
+#511 = FACE_OUTER_BOUND('',#411,.T.);
+#512 = FACE_OUTER_BOUND('',#412,.T.);
+#513 = FACE_OUTER_BOUND('',#413,.T.);
+#514 = FACE_OUTER_BOUND('',#414,.T.);
+
+#600 = AXIS2_PLACEMENT_3D('',#100,#13,#11);
+#601 = AXIS2_PLACEMENT_3D('',#105,#10,#11);
+#602 = AXIS2_PLACEMENT_3D('',#100,#15,#11);
+#603 = AXIS2_PLACEMENT_3D('',#101,#16,#12);
+#604 = AXIS2_PLACEMENT_3D('',#102,#16,#12);
+#605 = AXIS2_PLACEMENT_3D('',#103,#17,#11);
+#606 = AXIS2_PLACEMENT_3D('',#104,#14,#12);
+
+#610 = AXIS2_PLACEMENT_3D('',#114,#10,#11);
+#611 = AXIS2_PLACEMENT_3D('',#110,#15,#11);
+#612 = AXIS2_PLACEMENT_3D('',#111,#11,#12);
+#613 = AXIS2_PLACEMENT_3D('',#112,#12,#11);
+#614 = AXIS2_PLACEMENT_3D('',#113,#14,#12);
+
+#700 = PLANE('',#600);
+#701 = PLANE('',#601);
+#702 = PLANE('',#602);
+#703 = PLANE('',#603);
+#704 = PLANE('',#604);
+#705 = PLANE('',#605);
+#706 = PLANE('',#606);
+
+#710 = PLANE('',#610);
+#711 = PLANE('',#611);
+#712 = PLANE('',#612);
+#713 = PLANE('',#613);
+#714 = PLANE('',#614);
+
+#800 = ADVANCED_FACE('',(#500),#700,.T.);
+#801 = ADVANCED_FACE('',(#501),#701,.T.);
+#802 = ADVANCED_FACE('',(#502),#702,.T.);
+#803 = ADVANCED_FACE('',(#503),#703,.T.);
+#804 = ADVANCED_FACE('',(#504),#704,.T.);
+#805 = ADVANCED_FACE('',(#505),#705,.T.);
+#806 = ADVANCED_FACE('',(#506),#706,.T.);
+
+#810 = ADVANCED_FACE('',(#510),#710,.T.);
+#811 = ADVANCED_FACE('',(#511),#711,.T.);
+#812 = ADVANCED_FACE('',(#512),#712,.T.);
+#813 = ADVANCED_FACE('',(#513),#713,.T.);
+#814 = ADVANCED_FACE('',(#514),#714,.T.);
+ENDSEC;
+END-ISO-10303-21;
