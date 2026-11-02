@@ -2,22 +2,25 @@ using System.IO;
 using System.Text.Json;
 using System.Windows;
 using Microsoft.Web.WebView2.Core;
+using WinForms = System.Windows.Forms;
 
 namespace WeldView.Desktop;
 
 /// <summary>
-/// 桌面主窗口：承载 WebView2，把本地应用目录映射为 https 虚拟源后加载宿主页面。
+/// 桌面主窗口：托盘常驻宿主 + WebView2 承载前端。
 ///
-/// 设计依据（来自对发行版 exe 与安装目录的静态分析）：
-///   - PE 含 .CLR_UEF 节区、仅导入 Win32 + UCRT → .NET 桌面程序；
-///   - 二进制含 WebView2 特征串，安装目录含 webview_profile → 使用 WebView2 内核；
-///   - 宿主页面与 wv33.js 均无 chrome.webview / postMessage 调用 → 无 JS↔宿主 IPC，
-///     页面完全在浏览器内核内自洽运行，宿主只负责窗口与文件下载。
+/// 架构（依据发行版二进制与前端代码逆向确定）：
+///   前端页面  https://weldview.local/            ← WebView2 虚拟主机映射
+///   宿主 API  http://127.0.0.1:{动态端口}/api/*  ← 本类 HostApi，端口经 ?hostPort= 传给页面
+///   桥接服务  http://127.0.0.1:18766/api/open_sw ← tools/ 下的 Python 服务（SolidWorks COM）
 /// </summary>
 public partial class MainWindow : Window
 {
     private readonly string _appRoot;
+    private readonly HostApi _host = new();
+    private WinForms.NotifyIcon? _tray;
     private bool _webViewReady;
+    private bool _reallyExit;
 
     public MainWindow(string appRoot)
     {
@@ -25,12 +28,81 @@ public partial class MainWindow : Window
         InitializeComponent();
 
         RestoreWindowBounds();
+        SetupTray();
 
         Loaded += async (_, _) => await InitializeWebViewAsync();
-        Closing += (_, _) => SaveWindowBounds();
+        Closing += OnClosing;
     }
 
-    // ---------------- WebView2 初始化 ----------------
+    // ------------------------------------------------------------ 托盘常驻
+
+    private void SetupTray()
+    {
+        var menu = new WinForms.ContextMenuStrip();
+        menu.Items.Add("显示主窗口", null, (_, _) => RestoreFromTray());
+        menu.Items.Add(new WinForms.ToolStripSeparator());
+        menu.Items.Add("退出", null, (_, _) => ExitApplication());
+
+        _tray = new WinForms.NotifyIcon
+        {
+            Text = "WeldView 3D Studio",
+            Icon = LoadTrayIcon(),
+            Visible = true,
+            ContextMenuStrip = menu
+        };
+        _tray.DoubleClick += (_, _) => RestoreFromTray();
+    }
+
+    private static System.Drawing.Icon LoadTrayIcon()
+    {
+        try
+        {
+            var exe = Environment.ProcessPath;
+            if (!string.IsNullOrEmpty(exe))
+            {
+                var icon = System.Drawing.Icon.ExtractAssociatedIcon(exe);
+                if (icon is not null) return icon;
+            }
+        }
+        catch
+        {
+            // 回退到系统默认图标
+        }
+        return System.Drawing.SystemIcons.Application;
+    }
+
+    private void RestoreFromTray()
+    {
+        Show();
+        WindowState = WindowState.Normal;
+        Activate();
+    }
+
+    private void ExitApplication()
+    {
+        _reallyExit = true;
+        Close();
+    }
+
+    private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
+    {
+        SaveWindowBounds();
+
+        // 点关闭按钮 → 收进托盘；通过托盘「退出」才真正结束
+        if (!_reallyExit)
+        {
+            e.Cancel = true;
+            Hide();
+            _tray?.ShowBalloonTip(1500, "WeldView 3D Studio",
+                "程序仍在后台运行，可从托盘图标恢复窗口。", WinForms.ToolTipIcon.Info);
+            return;
+        }
+
+        _tray?.Dispose();
+        _host.Dispose();
+    }
+
+    // ------------------------------------------------------ WebView2 初始化
 
     private async Task InitializeWebViewAsync()
     {
@@ -52,15 +124,17 @@ public partial class MainWindow : Window
             ConfigureSettings(core);
             RegisterHandlers(core);
 
-            // 关键：把本地目录映射为 https 源。
-            // 直接用 file:// 加载时，ES Module 与 WASM 会被浏览器安全策略拦截。
+            // 本地目录 → https 虚拟源。file:// 下 ES Module 与 WASM 会被安全策略拦截。
             core.SetVirtualHostNameToFolderMapping(
                 AppPaths.VirtualHost,
                 _appRoot,
                 CoreWebView2HostResourceAccessKind.Allow);
 
-            SplashStatus.Text = "正在加载焊缝识别工作台…";
-            core.Navigate(AppPaths.HostUrl);
+            // 启动宿主 API，并把动态端口通过查询串交给页面（前端 hostBase() 读取 hostPort）
+            var port = _host.Start();
+
+            SplashStatus.Text = $"正在加载焊缝识别工作台（宿主端口 {port}）…";
+            core.Navigate($"{AppPaths.HostUrl}?hostPort={port}");
 
             _webViewReady = true;
         }
@@ -80,16 +154,15 @@ public partial class MainWindow : Window
         s.AreDefaultContextMenusEnabled = false;
         s.IsStatusBarEnabled = false;
         s.IsZoomControlEnabled = true;
-        s.AreBrowserAcceleratorKeysEnabled = true;   // 保留 F5 / Ctrl+滚轮等
+        s.AreBrowserAcceleratorKeysEnabled = true;
         s.IsSwipeNavigationEnabled = false;
-        s.AreHostObjectsAllowed = false;             // 无宿主对象注入，与观测一致
-        s.IsWebMessageEnabled = false;               // 无 postMessage 通道，与观测一致
-        s.AreDevToolsEnabled = false;                // 发行版关闭；调试时改为 true
+        s.AreHostObjectsAllowed = false;   // 前端不使用宿主对象注入
+        s.IsWebMessageEnabled = false;     // 前端不使用 postMessage
+        s.AreDevToolsEnabled = false;      // 调试时改为 true
     }
 
     private void RegisterHandlers(CoreWebView2 core)
     {
-        // 外部链接：交给系统默认浏览器，避免在应用窗口内跳出
         core.NewWindowRequested += (_, e) =>
         {
             e.Handled = true;
@@ -120,7 +193,7 @@ public partial class MainWindow : Window
         };
     }
 
-    // ---------------- 下载与导出 ----------------
+    // -------------------------------------------------------- 下载与导出
 
     private void OnDownloadStarting(object? sender, CoreWebView2DownloadStartingEventArgs e)
     {
@@ -139,7 +212,7 @@ public partial class MainWindow : Window
         }
         catch
         {
-            // 导出目录不可写时回退到系统默认下载流程
+            // 导出目录不可写时回退到系统默认流程
         }
     }
 
@@ -159,7 +232,7 @@ public partial class MainWindow : Window
         }
     }
 
-    // ---------------- 窗口状态持久化 ----------------
+    // ------------------------------------------------------ 窗口状态持久化
 
     private sealed class WindowStateDto
     {
@@ -180,7 +253,6 @@ public partial class MainWindow : Window
                 File.ReadAllText(AppPaths.WindowStateFile));
             if (dto is null) return;
 
-            // 防止显示器变更后窗口落在屏幕外
             var vLeft = SystemParameters.VirtualScreenLeft;
             var vTop = SystemParameters.VirtualScreenTop;
             var vRight = vLeft + SystemParameters.VirtualScreenWidth;
@@ -204,7 +276,7 @@ public partial class MainWindow : Window
         }
         catch
         {
-            // 配置损坏时忽略，使用默认尺寸
+            // 配置损坏时忽略
         }
     }
 

@@ -1,0 +1,15 @@
+{
+  "name": "weldview-3d-studio-tools",
+  "version": "3.7.0",
+  "private": true,
+  "description": "WeldView 3D Studio 辅助构建工具的依赖声明（图标生成等）",
+  "scripts": {
+    "build:icons": "node tools/build_icons.js"
+  },
+  "devDependencies": {
+    "sharp": "^0.33.5"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

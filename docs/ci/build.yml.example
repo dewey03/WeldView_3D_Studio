@@ -1,0 +1,78 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'desktop/**'
+      - '.github/workflows/build.yml'
+  pull_request:
+    paths:
+      - 'desktop/**'
+  workflow_dispatch:
+
+jobs:
+  desktop:
+    name: 编译桌面端 (.NET 8 / win-x64)
+    runs-on: windows-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: 还原依赖
+        run: dotnet restore desktop/WeldView.Desktop.csproj
+
+      - name: 编译
+        run: dotnet build desktop/WeldView.Desktop.csproj -c Release --no-restore
+
+      - name: 发布单文件 exe
+        run: >
+          dotnet publish desktop/WeldView.Desktop.csproj
+          -c Release -r win-x64 --self-contained false
+          -p:PublishSingleFile=true
+          -p:EnableCompressionInSingleFile=true
+          -o dist/publish
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: WeldView_3D_Studio-win-x64
+          path: dist/publish/WeldView_3D_Studio.exe
+          if-no-files-found: error
+
+  frontend-check:
+    name: 前端资源完整性检查
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 校验宿主页面引用路径
+        shell: bash
+        run: |
+          set -e
+          missing=0
+          # 宿主页面用相对路径引用 assets/，缺一个就会白屏
+          while IFS= read -r p; do
+            if [ ! -f "$p" ]; then
+              echo "::error file=WeldView_3D_Studio_V3.3.html::引用的资源不存在: $p"
+              missing=1
+            fi
+          done < <(grep -oE '(src|href)="assets/[^"]+"' WeldView_3D_Studio_V3.3.html \
+                   | sed 's/.*="//;s/"//' | sort -u)
+          [ "$missing" -eq 0 ] && echo "全部资源引用可解析"
+          exit $missing
+
+      - name: 校验 importmap 目标存在
+        shell: bash
+        run: |
+          test -f assets/vendor/three/three.module.min.js
+          test -f assets/vendor/occt/occt-import-js.wasm
+          echo "importmap 与 WASM 依赖存在"

@@ -1,0 +1,30 @@
+# 统一换行符为 LF，避免 Windows/Linux 协作时产生无意义的整文件 diff
+* text=auto eol=lf
+
+# ---- 源码 ----
+*.cs        text diff=csharp
+*.py        text diff=python
+*.js        text diff=javascript
+*.html      text diff=html
+*.css       text diff=css
+*.md        text diff=markdown
+*.json      text
+*.csproj    text
+*.xaml      text
+*.iss       text
+*.ps1       text eol=crlf
+*.bat       text eol=crlf
+
+# ---- 二进制：禁止文本化与 diff ----
+*.wasm      binary
+*.ico       binary
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.exe       binary
+*.dll       binary
+*.zip       binary
+*.step      binary
+*.stp       binary
+*.sldprt    binary
+*.sldasm    binary

@@ -4,6 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
 
@@ -23,6 +24,9 @@
     <Version>3.7.0</Version>
     <FileVersion>3.7.0.0</FileVersion>
     <InformationalVersion>3.7</InformationalVersion>
+
+    <!-- WFAC010：DPI 感知由 app.manifest 声明，无需 WinForms 的 HighDpiMode 属性 -->
+    <NoWarn>$(NoWarn);WFAC010</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
